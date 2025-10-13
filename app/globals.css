@@ -1,15 +1,25 @@
 @import "tailwindcss";
+@import "./animations.css";
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary: #163466;
+  --cta: #fac11c;
+  --peak: #ef4444;
+  --midpeak: #f59e0b;
+  --offpeak: #10b981;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-cta: var(--cta);
+  --color-peak: var(--peak);
+  --color-midpeak: var(--midpeak);
+  --color-offpeak: var(--offpeak);
+  --font-sans: var(--font-nunito-sans);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +32,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-nunito-sans), 'Nunito Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
