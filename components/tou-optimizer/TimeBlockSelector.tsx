@@ -21,9 +21,12 @@ export default function TimeBlockSelector({
   deviceName = 'device',
 }: TimeBlockSelectorProps) {
   const selectedCount = timeBlocks.filter((b) => b.isSelected).length;
+  const allHours = timeBlocks.map((block) => block.hour);
+  const shouldShowAllDay =
+    duration >= 24 || deviceName.toLowerCase().includes('fridge');
 
   // Quick select presets
-  const quickPresets = [
+  const basePresets = [
     {
       name: 'Morning',
       icon: Sunrise,
@@ -49,6 +52,17 @@ export default function TimeBlockSelector({
       description: '10pm - 6am',
     },
   ];
+  const quickPresets = shouldShowAllDay
+    ? [
+        {
+          name: 'All Day',
+          icon: Clock,
+          hours: allHours,
+          description: '24 hours',
+        },
+        ...basePresets,
+      ]
+    : basePresets;
 
   const handleQuickSelect = (hours: number[]) => {
     if (onBulkSelect) {

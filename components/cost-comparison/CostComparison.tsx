@@ -16,7 +16,7 @@ export default function CostComparison() {
   // Check if any devices are added
   if (devices.length === 0) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-yellow-50 border border-yellow-100 rounded-xl shadow-md p-6 text-center">
           <p className="text-lg text-yellow-800 mb-2">
             No devices added yet
@@ -36,7 +36,7 @@ export default function CostComparison() {
 
   if (!hasTimeBlocks) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-yellow-50 border border-yellow-100 rounded-xl shadow-md p-6 text-center">
           <p className="text-lg text-yellow-800 mb-2">
             Please configure your devices
@@ -50,7 +50,7 @@ export default function CostComparison() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Header */}
       <div className="text-center">
         <h2 className="text-3xl font-bold text-primary mb-2">
@@ -97,13 +97,8 @@ export default function CostComparison() {
                       {device.device.name}
                     </h4>
                     <div className="flex flex-wrap gap-2 text-xs text-gray-600">
-                      <span className="flex items-center gap-1">
-                        <Zap className="w-3 h-3" />
-                        {device.device.wattage}W
-                      </span>
-                      <span>•</span>
                       <span>{device.duration}h/day</span>
-                      <span>•</span>
+                      <span>-</span>
                       <span className="capitalize">{device.device.category}</span>
                     </div>
                     {selectedHours > 0 && (
@@ -173,4 +168,3 @@ export default function CostComparison() {
     </div>
   );
 }
-

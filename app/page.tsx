@@ -11,7 +11,7 @@ import TimeBlockSelector from '@/components/tou-optimizer/TimeBlockSelector';
 import SkeletonLoader from '@/components/shared/SkeletonLoader';
 import { AppProvider, useAppContext } from '@/contexts/AppContext';
 import { Device, AlternativeFuel } from '@/lib/types';
-import { RotateCcw, CheckCircle, ArrowLeft } from 'lucide-react';
+import { RotateCcw, CheckCircle, ArrowLeft, Check } from 'lucide-react';
 
 // Lazy load heavy visualization components
 const CostComparison = dynamic(() => import('@/components/cost-comparison/CostComparison'), {
@@ -58,11 +58,23 @@ function HomeContent() {
   // For display in configuration, use selectedDevice
   const displayDevice = selectedDevice;
 
+  const resetCurrentSelections = () => {
+    setTimeBlocks((prev) =>
+      prev.map((block) => ({
+        ...block,
+        isSelected: false,
+      }))
+    );
+    setDuration(1);
+    setAlternativeFuel(null);
+    setMealsPerDay(2);
+  };
+
   // Step management
   const currentStep = !displayDevice ? 1 : !configCompleted ? 2 : 3;
 
   const handleDeviceSelect = (device: Device) => {
-    setSelectedDevice(device);
+    setSelectedDevice({ ...device });
     setShowConfig(true);
     setConfigCompleted(false);
   };
@@ -71,10 +83,20 @@ function HomeContent() {
     duration: number;
     mealsPerDay?: number;
     alternativeFuel?: AlternativeFuel;
+    wattage: number;
   }) => {
     setDuration(config.duration);
-    if (config.mealsPerDay) setMealsPerDay(config.mealsPerDay);
-    if (config.alternativeFuel) setAlternativeFuel(config.alternativeFuel);
+    if (config.mealsPerDay !== undefined) {
+      setMealsPerDay(config.mealsPerDay);
+    } else {
+      setMealsPerDay(2);
+    }
+    if (config.alternativeFuel) {
+      setAlternativeFuel(config.alternativeFuel);
+    } else {
+      setAlternativeFuel(null);
+    }
+    setSelectedDevice((prev) => (prev ? { ...prev, wattage: config.wattage } : prev));
     setShowConfig(false);
     setConfigCompleted(true);
   };
@@ -97,6 +119,7 @@ function HomeContent() {
     setSelectedDevice(null);
     setConfigCompleted(false);
     setShowAnalysis(false);
+    resetCurrentSelections();
   };
 
   const handleViewAnalysis = () => {
@@ -120,6 +143,14 @@ function HomeContent() {
     setConfigCompleted(false);
     setShowAnalysis(false);
     // Don't call resetAll() - we want to keep the devices array intact
+  };
+
+  const handleCloseDeviceConfig = () => {
+    setShowConfig(false);
+    setConfigCompleted(false);
+    setSelectedDevice(null);
+    setShowAnalysis(false);
+    resetCurrentSelections();
   };
 
   const selectedCount = timeBlocks.filter((b) => b.isSelected).length;
@@ -155,7 +186,7 @@ function HomeContent() {
                 w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-lg
                 ${currentStep > 1 ? 'bg-green-500' : currentStep === 1 ? 'bg-cta text-primary' : 'bg-white bg-opacity-30'}
               `}>
-                {currentStep > 1 ? '✓' : '1'}
+                {currentStep > 1 ? <Check className="w-4 h-4" /> : '1'}
               </div>
               <div>
                 <div className="font-semibold">Select Device</div>
@@ -168,7 +199,7 @@ function HomeContent() {
                 w-8 h-8 rounded-full flex items-center justify-center font-bold shadow-lg
                 ${currentStep > 2 ? 'bg-green-500' : currentStep === 2 ? 'bg-cta text-primary' : 'bg-white bg-opacity-30'}
               `}>
-                {currentStep > 2 ? '✓' : '2'}
+                {currentStep > 2 ? <Check className="w-4 h-4" /> : '2'}
               </div>
               <div>
                 <div className="font-semibold">Configure</div>
@@ -210,7 +241,7 @@ function HomeContent() {
                         >
                           <span className="font-semibold">{d.device.name}</span>
                           <span className="text-gray-600 ml-2">
-                            ({d.device.wattage}W)
+                            - {d.duration}h/day
                           </span>
                         </div>
                       ))}
@@ -238,7 +269,7 @@ function HomeContent() {
         {showConfig && selectedDevice && (
           <DeviceConfig
             device={selectedDevice}
-            onClose={() => setShowConfig(false)}
+            onClose={handleCloseDeviceConfig}
             onConfirm={handleConfigConfirm}
           />
         )}
@@ -256,7 +287,7 @@ function HomeContent() {
                   <div>
                     <h3 className="text-xl font-bold text-gray-900">{displayDevice.name}</h3>
                     <p className="text-gray-600">
-                      {displayDevice.wattage}W • {duration}h per day • {displayDevice.category}
+                      {duration}h per day - {displayDevice.category}
                     </p>
                   </div>
                 </div>
@@ -300,7 +331,7 @@ function HomeContent() {
                     </div>
                   </div>
                   <Button variant="cta" onClick={handleViewAnalysis}>
-                    View Cost Analysis →
+                    View Cost Analysis
                   </Button>
                 </div>
               </Card>
@@ -311,6 +342,8 @@ function HomeContent() {
         {/* Cost Comparison Analysis - Shows ALL devices aggregated */}
         {showAnalysis && devices.length > 0 && (
           <>
+            
+
             {/* Device Summary Header */}
             <Card className="shadow-xl">
               <div className="flex items-center justify-between flex-wrap gap-4">
@@ -323,8 +356,8 @@ function HomeContent() {
                       {devices.length === 1 ? devices[0].device.name : `${devices.length} Devices`}
                     </h3>
                     <p className="text-gray-600">
-                      {devices.length === 1 
-                        ? `${devices[0].device.wattage}W • ${devices[0].duration}h per day • ${devices[0].timeBlocks.filter(b => b.isSelected).length} hour${devices[0].timeBlocks.filter(b => b.isSelected).length !== 1 ? 's' : ''} selected`
+                      {devices.length === 1
+                        ? `${devices[0].duration}h per day - ${devices[0].timeBlocks.filter(b => b.isSelected).length} hour${devices[0].timeBlocks.filter(b => b.isSelected).length !== 1 ? 's' : ''} selected`
                         : `Analyzing ${devices.length} devices`
                       }
                     </p>
@@ -354,11 +387,11 @@ function HomeContent() {
               </div>
             </Card>
 
+            {/* Load Profile Visualization - prioritized for quick insight */}
+            <LoadProfile showComparison={true} />
+
             {/* Cost Comparison Component */}
             <CostComparison />
-
-            {/* Load Profile Visualization */}
-            <LoadProfile showComparison={true} />
 
             {/* CO2 Impact Dashboard */}
             <CO2Dashboard />
@@ -430,3 +463,4 @@ export default function Home() {
     </AppProvider>
   );
 }
+

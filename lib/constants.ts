@@ -26,104 +26,65 @@ export const TOU_TIME_BANDS: TariffTimeRange[] = [
 // Device catalog with typical Kenyan market specifications
 // Core devices for the simulation game
 export const DEVICE_CATALOG: Device[] = [
-  // PRIMARY COOKING APPLIANCES (As specified in requirements)
   {
     id: 'electric-pressure-cooker',
     name: 'Electric Pressure Cooker (EPC)',
     type: 'Electric Pressure Cooker',
     category: 'cooking',
-    wattage: 1000, // Typical EPC: 800-1200W
-    typicalUsageHours: 1.5, // Average cooking time per day
+    wattage: 1000, // Reference value, user can override
+    typicalUsageHours: 1.5,
     requiresAlternativeFuel: true,
+    loadProfileType: 'pulsing',
   },
   {
     id: 'induction-cooker',
     name: 'Induction Cooker',
     type: 'Induction Cooker',
     category: 'cooking',
-    wattage: 2000, // Typical induction: 1800-2400W
-    typicalUsageHours: 2, // Average cooking time per day
+    wattage: 2000, // Reference value, user can override
+    typicalUsageHours: 2,
     requiresAlternativeFuel: true,
+    loadProfileType: 'pulsing',
   },
-  
-  // REFRIGERATION (As specified in requirements)
-  {
-    id: 'fridge',
-    name: 'Refrigerator',
-    type: 'Refrigerator',
-    category: 'refrigeration',
-    wattage: 150, // Typical fridge: 100-200W running (cycles on/off)
-    typicalUsageHours: 24, // Always on
-    requiresAlternativeFuel: false,
-  },
-  
-  // CLIMATE CONTROL (As specified in requirements)
-  {
-    id: 'fan',
-    name: 'Electric Fan',
-    type: 'Fan',
-    category: 'other',
-    wattage: 75, // Typical standing fan: 50-100W
-    typicalUsageHours: 8, // Typical usage during hot weather
-    requiresAlternativeFuel: false,
-  },
-  
-  // LIGHTING (As specified in requirements)
   {
     id: 'led-bulb',
     name: 'LED Bulb',
     type: 'LED Bulb',
     category: 'lighting',
-    wattage: 10, // Single 10W LED bulb (equivalent to 60W incandescent)
-    typicalUsageHours: 6, // Evening usage
+    wattage: 10, // Reference value, user can override
+    typicalUsageHours: 6,
     requiresAlternativeFuel: false,
-  },
-  
-  // ADDITIONAL COMMON APPLIANCES
-  {
-    id: 'electric-kettle',
-    name: 'Electric Kettle',
-    type: 'Electric Kettle',
-    category: 'cooking',
-    wattage: 1500, // Typical kettle: 1500-2200W
-    typicalUsageHours: 0.5,
-    requiresAlternativeFuel: true,
+    loadProfileType: 'continuous',
   },
   {
-    id: 'water-heater',
-    name: 'Electric Water Heater',
-    type: 'Water Heater',
-    category: 'heating',
-    wattage: 3000, // Typical instantaneous heater: 3000-4500W
-    typicalUsageHours: 1.5,
+    id: 'fridge',
+    name: 'Refrigerator',
+    type: 'Refrigerator',
+    category: 'refrigeration',
+    wattage: 150, // Reference value, user can override
+    typicalUsageHours: 24,
     requiresAlternativeFuel: false,
-  },
-  {
-    id: 'iron',
-    name: 'Electric Iron',
-    type: 'Iron',
-    category: 'heating',
-    wattage: 1200, // Typical iron: 1000-1400W
-    typicalUsageHours: 1,
-    requiresAlternativeFuel: false,
+    loadProfileType: 'cycling',
   },
   {
     id: 'tv',
-    name: 'Television (LED)',
+    name: 'Smart TV',
     type: 'Television',
     category: 'other',
-    wattage: 80, // Modern LED TV 32-42": 60-120W
+    wattage: 90, // Reference value, user can override
     typicalUsageHours: 5,
     requiresAlternativeFuel: false,
+    loadProfileType: 'continuous',
   },
   {
-    id: 'washing-machine',
-    name: 'Washing Machine',
-    type: 'Washing Machine',
+    id: 'fan',
+    name: 'Electric Fan',
+    type: 'Fan',
     category: 'other',
-    wattage: 500, // Typical top-loader: 300-700W
-    typicalUsageHours: 1,
+    wattage: 75, // Reference value, user can override
+    typicalUsageHours: 8,
     requiresAlternativeFuel: false,
+    loadProfileType: 'cycling',
   },
 ];
 

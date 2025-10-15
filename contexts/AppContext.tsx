@@ -22,16 +22,16 @@ interface AppContextType {
   
   // Current device being configured (before adding to list)
   currentDevice: Device | null;
-  setCurrentDevice: (device: Device | null) => void;
+  setCurrentDevice: React.Dispatch<React.SetStateAction<Device | null>>;
   currentTimeBlocks: TimeBlock[];
-  setCurrentTimeBlocks: (blocks: TimeBlock[]) => void;
+  setCurrentTimeBlocks: React.Dispatch<React.SetStateAction<TimeBlock[]>>;
   toggleCurrentTimeBlock: (hour: number) => void;
   currentDuration: number;
-  setCurrentDuration: (hours: number) => void;
+  setCurrentDuration: React.Dispatch<React.SetStateAction<number>>;
   currentAlternativeFuel: AlternativeFuel | null;
-  setCurrentAlternativeFuel: (fuel: AlternativeFuel | null) => void;
+  setCurrentAlternativeFuel: React.Dispatch<React.SetStateAction<AlternativeFuel | null>>;
   currentMealsPerDay: number;
-  setCurrentMealsPerDay: (meals: number) => void;
+  setCurrentMealsPerDay: React.Dispatch<React.SetStateAction<number>>;
   
   // Complete device configuration and add to devices list
   completeDeviceConfiguration: () => void;
@@ -82,7 +82,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const addDevice = (device: Device): string => {
     const newDevice: SelectedDevice = {
       id: generateDeviceId(),
-      device,
+      device: { ...device },
       timeBlocks: initializeTimeBlocks(),
       duration: device.category === 'refrigeration' ? 24 : 1,
       alternativeFuel: device.requiresAlternativeFuel ? undefined : undefined,
@@ -148,7 +148,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const newDevice: SelectedDevice = {
       id: generateDeviceId(),
-      device: currentDevice,
+      device: { ...currentDevice },
       timeBlocks: currentTimeBlocks,
       duration: currentDuration,
       alternativeFuel: currentAlternativeFuel || undefined,
@@ -278,4 +278,3 @@ export function useAppContext() {
   }
   return context;
 }
-

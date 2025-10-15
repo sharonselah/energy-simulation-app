@@ -1,5 +1,7 @@
 // TypeScript type definitions for the Energy Simulation Game
 
+export type LoadProfileType = 'continuous' | 'pulsing' | 'cycling';
+
 export interface Device {
   id: string;
   name: string;
@@ -8,6 +10,7 @@ export interface Device {
   wattage: number;
   typicalUsageHours?: number;
   requiresAlternativeFuel?: boolean;
+  loadProfileType: LoadProfileType;
 }
 
 export interface TimeBlock {

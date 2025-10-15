@@ -3,17 +3,13 @@
 import React from 'react';
 import { Device } from '@/lib/types';
 import { DEVICE_CATALOG } from '@/lib/constants';
-import { 
-  ChefHat, 
-  Microwave, 
-  Refrigerator, 
-  Fan, 
-  Lightbulb, 
-  Coffee,
-  Droplet,
-  Zap,
+import {
+  ChefHat,
+  Microwave,
+  Refrigerator,
+  Fan,
+  Lightbulb,
   Tv,
-  WashingMachine
 } from 'lucide-react';
 
 interface DeviceCatalogProps {
@@ -28,11 +24,7 @@ const deviceIcons: Record<string, React.ComponentType<{ className?: string }>> =
   'fridge': Refrigerator,
   'fan': Fan,
   'led-bulb': Lightbulb,
-  'electric-kettle': Coffee,
-  'water-heater': Droplet,
-  'iron': Zap,
   'tv': Tv,
-  'washing-machine': WashingMachine,
 };
 
 // Device category colors
@@ -65,7 +57,7 @@ export default function DeviceCatalog({ onDeviceSelect, selectedDevice }: Device
 
       {/* Device Grid */}
       <div 
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6 gap-4"
         role="group"
         aria-label="Appliance selection"
       >
@@ -79,7 +71,7 @@ export default function DeviceCatalog({ onDeviceSelect, selectedDevice }: Device
               key={device.id}
               onClick={() => onDeviceSelect(device)}
               onKeyDown={(e) => handleKeyDown(e, device)}
-              aria-label={`Select ${device.name}, ${device.wattage} watts, ${device.category}`}
+              aria-label={`Select ${device.name}, ${device.category}`}
               aria-pressed={isSelected}
               className={`
                 ${baseColor}
@@ -109,12 +101,11 @@ export default function DeviceCatalog({ onDeviceSelect, selectedDevice }: Device
               </h3>
 
               {/* Specs */}
-              <div className="text-xs text-gray-600 space-y-1">
-                <p className="font-medium text-primary">{device.wattage}W</p>
-                {device.typicalUsageHours && (
+              {device.typicalUsageHours && (
+                <div className="text-xs text-gray-600 space-y-1">
                   <p>~{device.typicalUsageHours}h/day</p>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Category Badge */}
               <div className="mt-2">

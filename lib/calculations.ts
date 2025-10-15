@@ -21,6 +21,10 @@ import {
   EFFICIENCY_SCORE_WEIGHTS,
   TOU_TIME_BANDS,
 } from './constants';
+import {
+  LOAD_PROFILE_INTERVAL_MINUTES,
+  calculatePowerAtTime as calculateProfilePowerAtTime,
+} from './loadProfile';
 
 /**
  * Calculate basic electricity cost
@@ -405,31 +409,61 @@ export function combineLoadProfiles(
     cost: 0,
   }));
 
-  devices.forEach((selectedDevice) => {
-    const timeBlocks = optimized
-      ? generateOptimizedTimeBlocks(selectedDevice.duration)
-      : selectedDevice.timeBlocks;
+  if (devices.length === 0) {
+    return loadProfile;
+  }
 
-    const selectedBlocks = timeBlocks.filter((b) => b.isSelected);
-    const hoursPerBlock = selectedDevice.duration / selectedBlocks.length || 0;
+  const samplesPerHour = Math.max(1, Math.round(60 / LOAD_PROFILE_INTERVAL_MINUTES));
+  const sampleIntervalHours = LOAD_PROFILE_INTERVAL_MINUTES / 60;
 
-    selectedBlocks.forEach((block) => {
-      const loadInKW = selectedDevice.device.wattage / 1000;
-      const hourLoad = (loadInKW * hoursPerBlock) / 1; // Load for this hour
-      
-      loadProfile[block.hour].totalLoad += hourLoad;
-      loadProfile[block.hour].deviceLoads[selectedDevice.id] = 
-        (loadProfile[block.hour].deviceLoads[selectedDevice.id] || 0) + hourLoad;
-      
-      // Calculate cost for this hour
-      const hourCost = calculateElectricityCost(
-        selectedDevice.device.wattage,
-        hoursPerBlock,
-        TOU_TARIFFS[block.rateType]
-      );
-      loadProfile[block.hour].cost += hourCost;
+  for (let hour = 0; hour < 24; hour++) {
+    const rateType = loadProfile[hour].rateType;
+    const hourlyRate = TOU_TARIFFS[rateType];
+
+    devices.forEach((selectedDevice) => {
+      const timeBlocks = optimized
+        ? generateOptimizedTimeBlocks(selectedDevice.duration)
+        : selectedDevice.timeBlocks;
+
+      const activeBlocks = timeBlocks.filter((block) => block.isSelected);
+
+      if (activeBlocks.length === 0) {
+        return;
+      }
+
+      let deviceEnergyForHour = 0;
+
+      for (let sampleIndex = 0; sampleIndex < samplesPerHour; sampleIndex++) {
+        const sampleStartMinutes = hour * 60 + sampleIndex * LOAD_PROFILE_INTERVAL_MINUTES;
+        const sampleMidpointMinutes = sampleStartMinutes + LOAD_PROFILE_INTERVAL_MINUTES / 2;
+
+        const samplePowerWatts = activeBlocks.reduce((power, block) => {
+          const blockStartMinutes = block.hour * 60;
+          const blockEndMinutes = blockStartMinutes + 60;
+
+          return (
+            power +
+            calculateProfilePowerAtTime(
+              sampleMidpointMinutes,
+              blockStartMinutes,
+              blockEndMinutes,
+              selectedDevice.device.wattage,
+              selectedDevice.device.loadProfileType
+            )
+          );
+        }, 0);
+
+        const sampleEnergyKWh = (samplePowerWatts / 1000) * sampleIntervalHours;
+        deviceEnergyForHour += sampleEnergyKWh;
+      }
+
+      loadProfile[hour].totalLoad += deviceEnergyForHour;
+      loadProfile[hour].deviceLoads[selectedDevice.id] =
+        (loadProfile[hour].deviceLoads[selectedDevice.id] || 0) + deviceEnergyForHour;
     });
-  });
+
+    loadProfile[hour].cost = loadProfile[hour].totalLoad * hourlyRate;
+  }
 
   return loadProfile;
 }
@@ -598,4 +632,3 @@ export function formatCurrency(value: number): string {
     maximumFractionDigits: 2,
   }).format(value);
 }
-

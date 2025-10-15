@@ -83,16 +83,11 @@ export default function DeviceBreakdown({
               {/* Device Header */}
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-semibold text-gray-900 text-sm">
-                      {device.device.name}
-                    </h4>
-                    <span className="text-xs text-gray-500">
-                      ({device.device.wattage}W)
-                    </span>
-                  </div>
+                  <h4 className="font-semibold text-gray-900 text-sm">
+                    {device.device.name}
+                  </h4>
                   <p className="text-xs text-gray-600">
-                    {device.duration}h/day • {device.device.category}
+                    {device.duration}h/day - {device.device.category}
                   </p>
                 </div>
                 
@@ -167,17 +162,17 @@ export default function DeviceBreakdown({
                   <div className="flex gap-2 text-xs">
                     {(cost.breakdown.offpeak ?? 0) > 0 && (
                       <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded">
-                        🟢 KES {(cost.breakdown.offpeak ?? 0).toFixed(2)}
+                        Off-Peak KES {(cost.breakdown.offpeak ?? 0).toFixed(2)}
                       </span>
                     )}
                     {(cost.breakdown.midpeak ?? 0) > 0 && (
                       <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
-                        🟡 KES {(cost.breakdown.midpeak ?? 0).toFixed(2)}
+                        Mid-Peak KES {(cost.breakdown.midpeak ?? 0).toFixed(2)}
                       </span>
                     )}
                     {(cost.breakdown.peak ?? 0) > 0 && (
                       <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded">
-                        🔴 KES {(cost.breakdown.peak ?? 0).toFixed(2)}
+                        Peak KES {(cost.breakdown.peak ?? 0).toFixed(2)}
                       </span>
                     )}
                   </div>
