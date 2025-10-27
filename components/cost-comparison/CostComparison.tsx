@@ -9,6 +9,7 @@ import ScenarioC from './ScenarioC';
 import ComparisonChart from './ComparisonChart';
 import SmartTips from '../shared/SmartTips';
 import Card from '../shared/Card';
+import { formatBrandSummary, getBrandSelection } from '@/lib/brand-utils';
 
 export default function CostComparison() {
   const { devices, multiDeviceState } = useAppContext();
@@ -83,6 +84,8 @@ export default function CostComparison() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {devices.map((device, index) => {
             const selectedHours = device.timeBlocks.filter(b => b.isSelected).length;
+            const brandSelection = getBrandSelection(device.brandSelection, device.device.brandSelection);
+            const brandSummary = formatBrandSummary(brandSelection);
             return (
               <div
                 key={device.id}
@@ -101,6 +104,11 @@ export default function CostComparison() {
                       <span>-</span>
                       <span className="capitalize">{device.device.category}</span>
                     </div>
+                    {brandSummary && (
+                      <p className="text-xs text-gray-500 mt-1 truncate">
+                        {brandSummary}
+                      </p>
+                    )}
                     {selectedHours > 0 && (
                       <div className="mt-2 flex items-center gap-1 text-xs text-green-700">
                         <CheckCircle className="w-3 h-3" />

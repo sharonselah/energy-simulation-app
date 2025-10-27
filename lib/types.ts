@@ -2,6 +2,19 @@
 
 export type LoadProfileType = 'continuous' | 'pulsing' | 'cycling';
 
+export type BrandAttributeValue = string | number | undefined;
+
+export type BrandSelectionSource = 'brand' | 'generic';
+
+export interface DeviceBrandSelection {
+  source: BrandSelectionSource;
+  sizeLabel: string;
+  wattage: number;
+  brandName?: string;
+  model?: string;
+  attributes?: Record<string, BrandAttributeValue>;
+}
+
 export interface Device {
   id: string;
   name: string;
@@ -11,6 +24,8 @@ export interface Device {
   typicalUsageHours?: number;
   requiresAlternativeFuel?: boolean;
   loadProfileType: LoadProfileType;
+  brandKey?: string;
+  brandSelection?: DeviceBrandSelection;
 }
 
 export interface TimeBlock {
@@ -80,6 +95,7 @@ export interface SelectedDevice {
   duration: number; // hours per day
   alternativeFuel?: AlternativeFuel; // for cooking devices
   mealsPerDay?: number; // for cooking devices
+  brandSelection?: DeviceBrandSelection;
 }
 
 export interface LoadProfilePoint {

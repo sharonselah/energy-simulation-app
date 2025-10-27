@@ -87,6 +87,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       duration: device.category === 'refrigeration' ? 24 : 1,
       alternativeFuel: device.requiresAlternativeFuel ? undefined : undefined,
       mealsPerDay: device.category === 'cooking' ? 2 : undefined,
+      brandSelection: device.brandSelection,
     };
     
     setDevices((prev) => [...prev, newDevice]);
@@ -153,6 +154,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       duration: currentDuration,
       alternativeFuel: currentAlternativeFuel || undefined,
       mealsPerDay: currentMealsPerDay,
+      brandSelection: currentDevice.brandSelection,
     };
 
     setDevices((prev) => [...prev, newDevice]);

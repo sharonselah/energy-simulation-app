@@ -11,6 +11,7 @@ import TimeBlockSelector from '@/components/tou-optimizer/TimeBlockSelector';
 import SkeletonLoader from '@/components/shared/SkeletonLoader';
 import { AppProvider, useAppContext } from '@/contexts/AppContext';
 import { Device, AlternativeFuel } from '@/lib/types';
+import { formatBrandSummary } from '@/lib/brand-utils';
 import { RotateCcw, CheckCircle, ArrowLeft, Check } from 'lucide-react';
 
 // Lazy load heavy visualization components
@@ -57,6 +58,12 @@ function HomeContent() {
 
   // For display in configuration, use selectedDevice
   const displayDevice = selectedDevice;
+  const currentBrandSummary = formatBrandSummary(selectedDevice?.brandSelection ?? null);
+  const displayDeviceLabel = displayDevice
+    ? currentBrandSummary
+      ? `${displayDevice.name} (${currentBrandSummary})`
+      : displayDevice.name
+    : null;
 
   const resetCurrentSelections = () => {
     setTimeBlocks((prev) =>
@@ -84,6 +91,7 @@ function HomeContent() {
     mealsPerDay?: number;
     alternativeFuel?: AlternativeFuel;
     wattage: number;
+    brandSelection?: Device['brandSelection'];
   }) => {
     setDuration(config.duration);
     if (config.mealsPerDay !== undefined) {
@@ -96,7 +104,15 @@ function HomeContent() {
     } else {
       setAlternativeFuel(null);
     }
-    setSelectedDevice((prev) => (prev ? { ...prev, wattage: config.wattage } : prev));
+    setSelectedDevice((prev) =>
+      prev
+        ? {
+            ...prev,
+            wattage: config.wattage,
+            brandSelection: config.brandSelection,
+          }
+        : prev
+    );
     setShowConfig(false);
     setConfigCompleted(true);
   };
@@ -289,6 +305,11 @@ function HomeContent() {
                     <p className="text-gray-600">
                       {duration}h per day - {displayDevice.category}
                     </p>
+                    {currentBrandSummary && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        {currentBrandSummary}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -314,7 +335,7 @@ function HomeContent() {
               onToggleBlock={toggleTimeBlock}
               onBulkSelect={handleBulkSelect}
               duration={duration}
-              deviceName={displayDevice.name}
+              deviceName={displayDeviceLabel ?? displayDevice.name}
             />
 
             {/* Next Steps */}
@@ -326,7 +347,7 @@ function HomeContent() {
                     <div>
                       <h4 className="font-semibold text-green-900">Ready for Analysis!</h4>
                       <p className="text-sm text-green-700">
-                        You&apos;ve selected {selectedCount} hour{selectedCount !== 1 ? 's' : ''} for your {displayDevice.name}
+                        You&apos;ve selected {selectedCount} hour{selectedCount !== 1 ? 's' : ''} for your {displayDeviceLabel ?? displayDevice.name}
                       </p>
                     </div>
                   </div>
@@ -463,4 +484,3 @@ export default function Home() {
     </AppProvider>
   );
 }
-

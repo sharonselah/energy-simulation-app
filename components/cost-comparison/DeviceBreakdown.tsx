@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp, Trash2, Edit, Zap } from 'lucide-react';
 import { CostBreakdown, SelectedDevice } from '@/lib/types';
+import { formatBrandSummary, getBrandSelection } from '@/lib/brand-utils';
 
 interface DeviceBreakdownProps {
   devices: SelectedDevice[];
@@ -75,11 +76,15 @@ export default function DeviceBreakdown({
       {/* Expanded Content */}
       {isExpanded && (
         <div className="px-4 pb-4 space-y-3">
-          {devicePercentages.map(({ device, cost, percentage }) => (
-            <div
-              key={device.id}
-              className="bg-white rounded-xl shadow-sm p-3 hover:shadow-md transition-shadow"
-            >
+          {devicePercentages.map(({ device, cost, percentage }) => {
+            const brandSelection = getBrandSelection(device.brandSelection, device.device.brandSelection);
+            const brandSummary = formatBrandSummary(brandSelection);
+
+            return (
+              <div
+                key={device.id}
+                className="bg-white rounded-xl shadow-sm p-3 hover:shadow-md transition-shadow"
+              >
               {/* Device Header */}
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1">
@@ -89,6 +94,11 @@ export default function DeviceBreakdown({
                   <p className="text-xs text-gray-600">
                     {device.duration}h/day - {device.device.category}
                   </p>
+                  {brandSummary && (
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {brandSummary}
+                    </p>
+                  )}
                 </div>
                 
                 {/* Action Buttons */}
@@ -179,7 +189,8 @@ export default function DeviceBreakdown({
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
 
           {/* Summary */}
           <div className="bg-gradient-to-r from-gray-700 to-gray-800 text-white rounded-xl shadow-lg p-3 mt-4">

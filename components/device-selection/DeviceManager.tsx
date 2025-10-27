@@ -6,7 +6,8 @@ import Card from '@/components/shared/Card';
 import Button from '@/components/shared/Button';
 import DeviceCatalog from './DeviceCatalog';
 import DeviceConfig from './DeviceConfig';
-import { Device, SelectedDevice } from '@/lib/types';
+import { Device, SelectedDevice, AlternativeFuel } from '@/lib/types';
+import { formatBrandSummary, getBrandSelection } from '@/lib/brand-utils';
 import { Plus, Edit2, Trash2, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatCurrency } from '@/lib/calculations';
 
@@ -22,6 +23,9 @@ export default function DeviceManager({ showAddDevice = false, onAddComplete }: 
     clearAllDevices,
     currentDevice,
     setCurrentDevice,
+    setCurrentDuration,
+    setCurrentMealsPerDay,
+    setCurrentAlternativeFuel,
     completeDeviceConfiguration,
     resetCurrentConfiguration,
     multiDeviceState,
@@ -38,21 +42,39 @@ export default function DeviceManager({ showAddDevice = false, onAddComplete }: 
     setShowConfig(true);
   };
 
-  const handleConfigConfirm = () => {
+  const handleConfigConfirm = (config: {
+    duration: number;
+    mealsPerDay?: number;
+    alternativeFuel?: AlternativeFuel;
+    wattage: number;
+    brandSelection?: Device['brandSelection'];
+  }) => {
     if (editingDeviceId) {
-      // Update existing device
-      // Note: This would need to be implemented in AppContext
-      // For now, we'll just complete the configuration for a new device
       setEditingDeviceId(null);
     }
-    
-    completeDeviceConfiguration();
+
+    setCurrentDuration(config.duration);
+    setCurrentMealsPerDay(config.mealsPerDay ?? 2);
+    setCurrentAlternativeFuel(config.alternativeFuel ?? null);
+    setCurrentDevice((prev) =>
+      prev
+        ? {
+            ...prev,
+            wattage: config.wattage,
+            brandSelection: config.brandSelection,
+          }
+        : prev
+    );
+
     setShowConfig(false);
-    resetCurrentConfiguration();
-    
-    if (onAddComplete) {
-      onAddComplete();
-    }
+
+    setTimeout(() => {
+      completeDeviceConfiguration();
+      resetCurrentConfiguration();
+      if (onAddComplete) {
+        onAddComplete();
+      }
+    }, 0);
   };
 
   const handleEditDevice = (device: SelectedDevice) => {
@@ -191,22 +213,27 @@ export default function DeviceManager({ showAddDevice = false, onAddComplete }: 
           {devices.map((selectedDevice, index) => {
             const deviceCostA = aggregatedCosts.scenarioA.byDevice[selectedDevice.id];
             const deviceCostB = aggregatedCosts.scenarioB.byDevice[selectedDevice.id];
-            const deviceCostC = aggregatedCosts.scenarioC.byDevice[selectedDevice.id];
-            
-            const savingsAtoC = deviceCostA && deviceCostC 
-              ? deviceCostA.monthly - deviceCostC.monthly 
-              : 0;
-            
-            const savingsBtoC = deviceCostB && deviceCostC 
-              ? deviceCostB.monthly - deviceCostC.monthly 
-              : 0;
+          const deviceCostC = aggregatedCosts.scenarioC.byDevice[selectedDevice.id];
+          
+          const savingsAtoC = deviceCostA && deviceCostC 
+            ? deviceCostA.monthly - deviceCostC.monthly 
+            : 0;
+          
+          const savingsBtoC = deviceCostB && deviceCostC 
+            ? deviceCostB.monthly - deviceCostC.monthly 
+            : 0;
 
-            const isExpanded = expandedDeviceId === selectedDevice.id;
+          const isExpanded = expandedDeviceId === selectedDevice.id;
+          const brandSelection = getBrandSelection(
+            selectedDevice.brandSelection,
+            selectedDevice.device.brandSelection
+          );
+          const brandSummary = formatBrandSummary(brandSelection);
 
-            return (
-              <div
-                key={selectedDevice.id}
-                className="bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg transition-shadow"
+          return (
+            <div
+              key={selectedDevice.id}
+              className="bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg transition-shadow"
               >
                 {/* Device Summary */}
                 <div className="p-4">
@@ -223,6 +250,9 @@ export default function DeviceManager({ showAddDevice = false, onAddComplete }: 
                           <p className="text-sm text-gray-600">
                             {selectedDevice.device.wattage}W • {selectedDevice.duration}h/day • {selectedDevice.device.category}
                           </p>
+                          {brandSummary && (
+                            <p className="text-xs text-gray-500 mt-0.5">{brandSummary}</p>
+                          )}
                         </div>
                       </div>
 
@@ -374,4 +404,3 @@ export default function DeviceManager({ showAddDevice = false, onAddComplete }: 
     </Card>
   );
 }
-

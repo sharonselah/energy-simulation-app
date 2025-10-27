@@ -30,6 +30,7 @@ export const DEVICE_CATALOG: Device[] = [
     id: 'electric-pressure-cooker',
     name: 'Electric Pressure Cooker (EPC)',
     type: 'Electric Pressure Cooker',
+    brandKey: 'Electric Pressure Cooker',
     category: 'cooking',
     wattage: 1000, // Reference value, user can override
     typicalUsageHours: 1.5,
@@ -40,6 +41,7 @@ export const DEVICE_CATALOG: Device[] = [
     id: 'induction-cooker',
     name: 'Induction Cooker',
     type: 'Induction Cooker',
+    brandKey: 'Induction Cooker',
     category: 'cooking',
     wattage: 2000, // Reference value, user can override
     typicalUsageHours: 2,
@@ -50,6 +52,7 @@ export const DEVICE_CATALOG: Device[] = [
     id: 'led-bulb',
     name: 'LED Bulb',
     type: 'LED Bulb',
+    brandKey: 'LED Bulb',
     category: 'lighting',
     wattage: 10, // Reference value, user can override
     typicalUsageHours: 6,
@@ -60,6 +63,7 @@ export const DEVICE_CATALOG: Device[] = [
     id: 'fridge',
     name: 'Refrigerator',
     type: 'Refrigerator',
+    brandKey: 'Refrigerator',
     category: 'refrigeration',
     wattage: 150, // Reference value, user can override
     typicalUsageHours: 24,
@@ -70,6 +74,7 @@ export const DEVICE_CATALOG: Device[] = [
     id: 'tv',
     name: 'Smart TV',
     type: 'Television',
+    brandKey: 'Television',
     category: 'other',
     wattage: 90, // Reference value, user can override
     typicalUsageHours: 5,
@@ -80,6 +85,7 @@ export const DEVICE_CATALOG: Device[] = [
     id: 'fan',
     name: 'Electric Fan',
     type: 'Fan',
+    brandKey: 'Electric Fan',
     category: 'other',
     wattage: 75, // Reference value, user can override
     typicalUsageHours: 8,
