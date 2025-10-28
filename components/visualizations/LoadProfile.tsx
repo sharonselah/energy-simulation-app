@@ -23,7 +23,7 @@ export default function LoadProfile({ showComparison = true }: LoadProfileProps)
   const [viewMode, setViewMode] = useState<ViewMode>(DEFAULT_VIEW_MODE);
 
   const { visibleDeviceIds, toggleDeviceVisibility, isDeviceVisible } = useDeviceVisibility(devices);
-  const { chartData, savings, hasDevices, hasTimeBlocks, isMultiDevice } = useLoadProfileData(
+  const { chartData, savings, totals, hasDevices, hasTimeBlocks, isMultiDevice } = useLoadProfileData(
     devices,
     visibleDeviceIds
   );
@@ -43,6 +43,7 @@ export default function LoadProfile({ showComparison = true }: LoadProfileProps)
         isMultiDevice={isMultiDevice}
         showComparison={showComparison}
         viewMode={viewMode}
+        totals={totals}
         onViewModeChange={setViewMode}
       />
 
@@ -60,6 +61,7 @@ export default function LoadProfile({ showComparison = true }: LoadProfileProps)
         viewMode={viewMode}
         isMultiDevice={isMultiDevice}
         hasTimeBlocks={hasTimeBlocks}
+        totals={totals}
       />
 
       <SavingsBanner

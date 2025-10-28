@@ -12,6 +12,7 @@ interface DeviceBreakdownProps {
   scenario: 'A' | 'B' | 'C';
   onEditDevice?: (deviceId: string) => void;
   onRemoveDevice?: (deviceId: string) => void;
+  defaultExpanded?: boolean;
 }
 
 export default function DeviceBreakdown({
@@ -21,9 +22,11 @@ export default function DeviceBreakdown({
   scenario,
   onEditDevice,
   onRemoveDevice,
+  defaultExpanded,
 }: DeviceBreakdownProps) {
-  // Auto-expand when multiple devices exist
-  const [isExpanded, setIsExpanded] = useState(devices.length > 1);
+  // Allow parent to control default state; default to expanded for single-device setups
+  const initialExpanded = defaultExpanded ?? (devices.length === 1);
+  const [isExpanded, setIsExpanded] = useState(initialExpanded);
 
   if (devices.length === 0) {
     return null;

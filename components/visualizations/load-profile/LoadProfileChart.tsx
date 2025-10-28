@@ -23,7 +23,11 @@ export const LoadProfileChart: React.FC<LoadProfileChartProps> = ({
   viewMode,
   isMultiDevice,
   hasTimeBlocks,
+  totals,
 }) => {
+  const formatCost = (value: number) =>
+    value.toLocaleString('en-KE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
   if (!hasTimeBlocks) {
     return (
       <div className="h-80 mt-6">
@@ -35,7 +39,41 @@ export const LoadProfileChart: React.FC<LoadProfileChartProps> = ({
   }
 
   return (
-    <div className="h-[28rem] mt-6">
+    <div className="relative h-[28rem] mt-6">
+      <div className="pointer-events-none absolute top-4 right-4 z-10 text-xs sm:text-sm">
+        <div className="rounded-lg border border-gray-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur">
+          <p className="text-[0.65rem] uppercase tracking-wide text-gray-500">Monthly Cost</p>
+          {viewMode === 'comparison' ? (
+            <div className="mt-2 space-y-1">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-gray-600">Current</span>
+                <span className="font-semibold text-gray-800">
+                  KES {formatCost(totals.currentMonthlyCost)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-emerald-700">Optimized</span>
+                <span className="font-semibold text-emerald-700">
+                  KES {formatCost(totals.optimizedMonthlyCost)}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-2">
+              <p className="text-[0.65rem] uppercase tracking-wide text-gray-500">
+                {viewMode === 'optimized' ? 'Optimized' : 'Current'}
+              </p>
+              <p className="text-sm font-semibold text-gray-800">
+                KES{' '}
+                {formatCost(
+                  viewMode === 'optimized' ? totals.optimizedMonthlyCost : totals.currentMonthlyCost
+                )}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 20, bottom: 30 }}>
           <defs>

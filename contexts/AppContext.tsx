@@ -1,13 +1,14 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
-import { Device, TimeBlock, AlternativeFuel, SelectedDevice, MultiDeviceState } from '@/lib/types';
+import { Device, TimeBlock, AlternativeFuel, SelectedDevice, MultiDeviceState, DeviceBrandSelection } from '@/lib/types';
 import { 
   getRateTypeForHour, 
   aggregateMultiDeviceCosts,
   aggregateGridMetrics,
   combineLoadProfiles,
 } from '@/lib/calculations';
+import { DEVICE_CATALOG, ALTERNATIVE_FUELS, FUEL_DAILY_CONSUMPTION } from '@/lib/constants';
 
 interface AppContextType {
   // Multi-device state
@@ -49,6 +50,7 @@ interface AppContextType {
   
   // Bulk operations
   loadDevices: (devices: SelectedDevice[]) => void;
+  loadDefaultScenario: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -65,6 +67,110 @@ const initializeTimeBlocks = (): TimeBlock[] => {
 // Generate unique ID for devices
 const generateDeviceId = () => {
   return `device-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+};
+
+const findDeviceById = (deviceId: string): Device => {
+  const device = DEVICE_CATALOG.find((entry) => entry.id === deviceId);
+  if (!device) {
+    throw new Error(`Device with id "${deviceId}" not found in catalog`);
+  }
+  return { ...device };
+};
+
+const createScenarioTimeBlocks = (selectedHours: number[]): TimeBlock[] => {
+  const hoursSet = new Set(selectedHours);
+  return initializeTimeBlocks().map((block) => ({
+    ...block,
+    isSelected: hoursSet.has(block.hour),
+  }));
+};
+
+type ScenarioDeviceOptions = {
+  selectedHours: number[];
+  duration: number;
+  wattageOverride?: number;
+  brandSelection?: DeviceBrandSelection;
+  mealsPerDay?: number;
+  alternativeFuelKey?: keyof typeof ALTERNATIVE_FUELS;
+};
+
+const buildScenarioDevice = (deviceId: string, options: ScenarioDeviceOptions): SelectedDevice => {
+  const baseDevice = findDeviceById(deviceId);
+  const wattage = options.wattageOverride ?? baseDevice.wattage;
+
+  const brandSelection = options.brandSelection;
+  const alternativeFuel = options.alternativeFuelKey
+    ? {
+        ...ALTERNATIVE_FUELS[options.alternativeFuelKey],
+        dailyConsumption: FUEL_DAILY_CONSUMPTION[options.alternativeFuelKey],
+      }
+    : undefined;
+
+  return {
+    id: generateDeviceId(),
+    device: {
+      ...baseDevice,
+      wattage,
+      brandSelection,
+    },
+    timeBlocks: createScenarioTimeBlocks(options.selectedHours),
+    duration: options.duration,
+    alternativeFuel,
+    mealsPerDay: options.mealsPerDay,
+    brandSelection,
+  };
+};
+
+const createDefaultScenarioDevices = (): SelectedDevice[] => {
+  const fullDayHours = Array.from({ length: 24 }, (_, hour) => hour);
+
+  const fridge = buildScenarioDevice('fridge', {
+    selectedHours: fullDayHours,
+    duration: 24,
+    wattageOverride: 160,
+    brandSelection: {
+      source: 'generic',
+      sizeLabel: '260L Double Door',
+      wattage: 160,
+    },
+  });
+
+  const tv = buildScenarioDevice('tv', {
+    selectedHours: [17, 18, 19, 20, 21],
+    duration: 5,
+    wattageOverride: 110,
+    brandSelection: {
+      source: 'generic',
+      sizeLabel: '55 inch LED',
+      wattage: 110,
+    },
+  });
+
+  const inductionCooker = buildScenarioDevice('induction-cooker', {
+    selectedHours: [7, 12, 19],
+    duration: 3,
+    wattageOverride: 1800,
+    mealsPerDay: 3,
+    alternativeFuelKey: 'lpg',
+    brandSelection: {
+      source: 'generic',
+      sizeLabel: 'Single burner',
+      wattage: 1800,
+    },
+  });
+
+  const eveningBulb = buildScenarioDevice('led-bulb', {
+    selectedHours: [18, 19, 20, 21],
+    duration: 4,
+    wattageOverride: 10,
+    brandSelection: {
+      source: 'generic',
+      sizeLabel: 'Warm white 10W',
+      wattage: 10,
+    },
+  });
+
+  return [fridge, tv, inductionCooker, eveningBulb];
 };
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -181,6 +287,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDevices(newDevices);
   };
 
+  const loadDefaultScenario = () => {
+    const scenarioDevices = createDefaultScenarioDevices();
+    setDevices(scenarioDevices);
+    resetCurrentConfiguration();
+  };
+
   // Compute aggregated multi-device state
   const multiDeviceState: MultiDeviceState = useMemo(() => {
     if (devices.length === 0) {
@@ -266,6 +378,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         resetCurrentConfiguration,
         resetAll,
         loadDevices,
+        loadDefaultScenario,
       }}
     >
       {children}

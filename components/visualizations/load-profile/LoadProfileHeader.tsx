@@ -15,9 +15,11 @@ export const LoadProfileHeader: React.FC<LoadProfileHeaderProps> = ({
   isMultiDevice,
   showComparison,
   viewMode,
+  totals,
   onViewModeChange,
 }) => {
   const primaryDevice = devices[0];
+  const formatKWh = (value: number) => (value >= 10 ? value.toFixed(1) : value.toFixed(2));
 
   return (
     <div className="mb-6">
@@ -54,6 +56,34 @@ export const LoadProfileHeader: React.FC<LoadProfileHeaderProps> = ({
                 {label}
               </button>
             ))}
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        {viewMode === 'comparison' ? (
+          <>
+            <div className="px-3 py-2 rounded-lg border border-primary/20 bg-primary/5">
+              <p className="text-xs uppercase tracking-wide text-primary/80">Current Total Load</p>
+              <p className="text-base font-semibold text-primary">
+                {formatKWh(totals.currentDailyKWh)} kWh / 24h
+              </p>
+            </div>
+            <div className="px-3 py-2 rounded-lg border border-emerald-200 bg-emerald-50">
+              <p className="text-xs uppercase tracking-wide text-emerald-700">Optimized Total Load</p>
+              <p className="text-base font-semibold text-emerald-700">
+                {formatKWh(totals.optimizedDailyKWh)} kWh / 24h
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="px-3 py-2 rounded-lg border border-primary/20 bg-primary/5">
+            <p className="text-xs uppercase tracking-wide text-primary/80">
+              {viewMode === 'optimized' ? 'Optimized Total Load' : 'Current Total Load'}
+            </p>
+            <p className="text-base font-semibold text-primary">
+              {formatKWh(viewMode === 'optimized' ? totals.optimizedDailyKWh : totals.currentDailyKWh)} kWh / 24h
+            </p>
           </div>
         )}
       </div>

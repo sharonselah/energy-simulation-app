@@ -9,6 +9,7 @@ import ScenarioC from './ScenarioC';
 import ComparisonChart from './ComparisonChart';
 import SmartTips from '../shared/SmartTips';
 import Card from '../shared/Card';
+import CollapsibleSection from '../shared/CollapsibleSection';
 import { formatBrandSummary, getBrandSelection } from '@/lib/brand-utils';
 
 export default function CostComparison() {
@@ -81,84 +82,95 @@ export default function CostComparison() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {devices.map((device, index) => {
-            const selectedHours = device.timeBlocks.filter(b => b.isSelected).length;
-            const brandSelection = getBrandSelection(device.brandSelection, device.device.brandSelection);
-            const brandSummary = formatBrandSummary(brandSelection);
-            return (
-              <div
-                key={device.id}
-                className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-semibold text-gray-900 text-sm mb-1 truncate">
-                      {device.device.name}
-                    </h4>
-                    <div className="flex flex-wrap gap-2 text-xs text-gray-600">
-                      <span>{device.duration}h/day</span>
-                      <span>-</span>
-                      <span className="capitalize">{device.device.category}</span>
+        <div className="space-y-4">
+          <CollapsibleSection
+            title="Configured devices"
+            description="Review each device, schedule, and fuel choice."
+            defaultOpen={devices.length <= 2}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+              {devices.map((device, index) => {
+                const selectedHours = device.timeBlocks.filter(b => b.isSelected).length;
+                const brandSelection = getBrandSelection(device.brandSelection, device.device.brandSelection);
+                const brandSummary = formatBrandSummary(brandSelection);
+                return (
+                  <div
+                    key={device.id}
+                    className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="bg-primary text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-900 text-sm mb-1 truncate">
+                          {device.device.name}
+                        </h4>
+                        <div className="flex flex-wrap gap-2 text-xs text-gray-600">
+                          <span>{device.duration}h/day</span>
+                          <span>-</span>
+                          <span className="capitalize">{device.device.category}</span>
+                        </div>
+                        {brandSummary && (
+                          <p className="text-xs text-gray-500 mt-1 truncate">
+                            {brandSummary}
+                          </p>
+                        )}
+                        {selectedHours > 0 && (
+                          <div className="mt-2 flex items-center gap-1 text-xs text-green-700">
+                            <CheckCircle className="w-3 h-3" />
+                            <span>{selectedHours} time slots configured</span>
+                          </div>
+                        )}
+                        {device.alternativeFuel && (
+                          <div className="mt-1">
+                            <span className="inline-block px-2 py-0.5 bg-orange-100 text-orange-800 text-xs rounded-full">
+                              Using {device.alternativeFuel.type}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    {brandSummary && (
-                      <p className="text-xs text-gray-500 mt-1 truncate">
-                        {brandSummary}
-                      </p>
-                    )}
-                    {selectedHours > 0 && (
-                      <div className="mt-2 flex items-center gap-1 text-xs text-green-700">
-                        <CheckCircle className="w-3 h-3" />
-                        <span>{selectedHours} time slots configured</span>
-                      </div>
-                    )}
-                    {device.alternativeFuel && (
-                      <div className="mt-1">
-                        <span className="inline-block px-2 py-0.5 bg-orange-100 text-orange-800 text-xs rounded-full">
-                          Using {device.alternativeFuel.type}
-                        </span>
-                      </div>
-                    )}
                   </div>
+                );
+              })}
+            </div>
+          </CollapsibleSection>
+
+          {devices.length > 1 && (
+            <CollapsibleSection
+              title="Aggregated metrics"
+              description="See combined load, usage distribution, and efficiency."
+            >
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div className="bg-white rounded-lg p-3 shadow-sm">
+                  <p className="text-xs text-gray-600 mb-1">Total Load</p>
+                  <p className="text-lg font-bold text-primary">
+                    {multiDeviceState.aggregatedMetrics.totalDailyKWh.toFixed(1)} kWh
+                  </p>
+                </div>
+                <div className="bg-white rounded-lg p-3 shadow-sm">
+                  <p className="text-xs text-gray-600 mb-1">Peak Usage</p>
+                  <p className="text-lg font-bold text-red-600">
+                    {multiDeviceState.aggregatedMetrics.peakUsage.toFixed(1)} kWh
+                  </p>
+                </div>
+                <div className="bg-white rounded-lg p-3 shadow-sm">
+                  <p className="text-xs text-gray-600 mb-1">Off-Peak Usage</p>
+                  <p className="text-lg font-bold text-green-600">
+                    {multiDeviceState.aggregatedMetrics.offPeakUsage.toFixed(1)} kWh
+                  </p>
+                </div>
+                <div className="bg-white rounded-lg p-3 shadow-sm">
+                  <p className="text-xs text-gray-600 mb-1">Efficiency Score</p>
+                  <p className="text-lg font-bold text-purple-600">
+                    {multiDeviceState.aggregatedMetrics.efficiencyScore.toFixed(1)}/10
+                  </p>
                 </div>
               </div>
-            );
-          })}
+            </CollapsibleSection>
+          )}
         </div>
-
-        {devices.length > 1 && (
-          <div className="mt-4 pt-4 border-t border-blue-200">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-              <div className="bg-white rounded-lg p-3 shadow-sm">
-                <p className="text-xs text-gray-600 mb-1">Total Load</p>
-                <p className="text-lg font-bold text-primary">
-                  {multiDeviceState.aggregatedMetrics.totalDailyKWh.toFixed(1)} kWh
-                </p>
-              </div>
-              <div className="bg-white rounded-lg p-3 shadow-sm">
-                <p className="text-xs text-gray-600 mb-1">Peak Usage</p>
-                <p className="text-lg font-bold text-red-600">
-                  {multiDeviceState.aggregatedMetrics.peakUsage.toFixed(1)} kWh
-                </p>
-              </div>
-              <div className="bg-white rounded-lg p-3 shadow-sm">
-                <p className="text-xs text-gray-600 mb-1">Off-Peak Usage</p>
-                <p className="text-lg font-bold text-green-600">
-                  {multiDeviceState.aggregatedMetrics.offPeakUsage.toFixed(1)} kWh
-                </p>
-              </div>
-              <div className="bg-white rounded-lg p-3 shadow-sm">
-                <p className="text-xs text-gray-600 mb-1">Efficiency Score</p>
-                <p className="text-lg font-bold text-purple-600">
-                  {multiDeviceState.aggregatedMetrics.efficiencyScore.toFixed(1)}/10
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </Card>
 
       {/* Three Scenarios */}
@@ -169,10 +181,28 @@ export default function CostComparison() {
       </div>
 
       {/* Comparison Chart */}
-      <ComparisonChart />
+      <Card className="border border-gray-200 bg-white shadow-sm overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-100">
+          <p className="text-sm font-semibold text-gray-800">Monthly cost comparison chart</p>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Visualize how each scenario impacts your monthly bill.
+          </p>
+        </div>
+        <div className="px-0 pb-0">
+          <ComparisonChart />
+        </div>
+      </Card>
 
       {/* Smart Tips */}
-      <SmartTips />
+      <Card className="border border-gray-200 bg-white shadow-sm">
+        <div className="px-4 py-3 border-b border-gray-100">
+          <p className="text-sm font-semibold text-gray-800">Smart tips & recommendations</p>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Actionable suggestions tailored to your devices and schedules.
+          </p>
+        </div>
+        <SmartTips />
+      </Card>
     </div>
   );
 }

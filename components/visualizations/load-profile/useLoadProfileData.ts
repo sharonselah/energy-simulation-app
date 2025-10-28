@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { SelectedDevice } from '@/lib/types';
 import { TOU_TARIFFS } from '@/lib/constants';
+import { calculateTOUCost, generateOptimizedTimeBlocks } from '@/lib/calculations';
 import { TIME_INTERVAL } from './constants';
 import {
   calculatePowerAtTime,
@@ -12,6 +13,7 @@ import {
   LoadProfileChartPoint,
   LoadProfileDataResult,
   LoadProfileSavings,
+  LoadProfileTotals,
 } from './types';
 
 export const useLoadProfileData = (
@@ -122,23 +124,91 @@ export const useLoadProfileData = (
     });
   }, [devices, hasDevices, isMultiDevice, visibleSet]);
 
-  const savings = useMemo<LoadProfileSavings>(() => {
-    if (!chartData.length) {
-      return {
-        saved: 0,
-        percentage: 0,
-        currentTotal: 0,
-        optimizedTotal: 0,
-      };
-    }
+  const energyTotals = useMemo(
+    () => {
+      if (!chartData.length) {
+        return {
+          currentDailyKWh: 0,
+          optimizedDailyKWh: 0,
+          currentDailyCost: 0,
+          optimizedDailyCost: 0,
+        };
+      }
 
-    const currentTotal = chartData.reduce((sum, data) => sum + data.currentCost, 0);
-    const optimizedTotal = chartData.reduce((sum, data) => sum + data.optimizedCost, 0);
+      const intervalHours = TIME_INTERVAL / 60;
+
+      return chartData.reduce(
+        (acc, data) => {
+          acc.currentDailyKWh += (data.currentTotal / 1000) * intervalHours;
+          acc.optimizedDailyKWh += (data.optimizedTotal / 1000) * intervalHours;
+          acc.currentDailyCost += data.currentCost;
+          acc.optimizedDailyCost += data.optimizedCost;
+          return acc;
+        },
+        {
+          currentDailyKWh: 0,
+          optimizedDailyKWh: 0,
+          currentDailyCost: 0,
+          optimizedDailyCost: 0,
+        }
+      );
+    },
+    [chartData]
+  );
+
+  const costTotals = useMemo(
+    () => {
+      if (!hasDevices) {
+        return {
+          currentDailyCost: 0,
+          optimizedDailyCost: 0,
+        };
+      }
+
+      let currentDailyCost = 0;
+      let optimizedDailyCost = 0;
+
+      devices.forEach((device) => {
+        if (!visibleSet.has(device.id)) {
+          return;
+        }
+
+        const currentCost = calculateTOUCost(device.device, device.timeBlocks, device.duration);
+        currentDailyCost += currentCost.daily;
+
+        const optimizedBlocks = generateOptimizedTimeBlocks(device.duration);
+        const optimizedCost = calculateTOUCost(device.device, optimizedBlocks, device.duration);
+        optimizedDailyCost += optimizedCost.daily;
+      });
+
+      return {
+        currentDailyCost,
+        optimizedDailyCost,
+      };
+    },
+    [devices, hasDevices, visibleSet]
+  );
+
+  const totals = useMemo<LoadProfileTotals>(
+    () => ({
+      currentDailyKWh: energyTotals.currentDailyKWh,
+      optimizedDailyKWh: energyTotals.optimizedDailyKWh,
+      currentDailyCost: costTotals.currentDailyCost,
+      optimizedDailyCost: costTotals.optimizedDailyCost,
+      currentMonthlyCost: costTotals.currentDailyCost * 30,
+      optimizedMonthlyCost: costTotals.optimizedDailyCost * 30,
+    }),
+    [costTotals, energyTotals]
+  );
+
+  const savings = useMemo<LoadProfileSavings>(() => {
+    const currentTotal = totals.currentDailyCost;
+    const optimizedTotal = totals.optimizedDailyCost;
     const saved = currentTotal - optimizedTotal;
     const percentage = currentTotal > 0 ? (saved / currentTotal) * 100 : 0;
 
     return { saved, percentage, currentTotal, optimizedTotal };
-  }, [chartData]);
+  }, [totals]);
 
   const hasTimeBlocks = useMemo(
     () => devices.some((device) => device.timeBlocks.some((block) => block.isSelected)),
@@ -148,6 +218,7 @@ export const useLoadProfileData = (
   return {
     chartData,
     savings,
+    totals,
     hasDevices,
     hasTimeBlocks,
     isMultiDevice,

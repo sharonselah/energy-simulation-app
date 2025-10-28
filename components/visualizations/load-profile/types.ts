@@ -24,9 +24,19 @@ export interface LoadProfileSavings {
   optimizedTotal: number;
 }
 
+export interface LoadProfileTotals {
+  currentDailyKWh: number;
+  optimizedDailyKWh: number;
+  currentDailyCost: number;
+  optimizedDailyCost: number;
+  currentMonthlyCost: number;
+  optimizedMonthlyCost: number;
+}
+
 export interface LoadProfileDataResult {
   chartData: LoadProfileChartPoint[];
   savings: LoadProfileSavings;
+  totals: LoadProfileTotals;
   hasDevices: boolean;
   hasTimeBlocks: boolean;
   isMultiDevice: boolean;
@@ -48,6 +58,7 @@ export interface LoadProfileHeaderProps {
   isMultiDevice: boolean;
   showComparison: boolean;
   viewMode: ViewMode;
+  totals: LoadProfileTotals;
   onViewModeChange: (mode: ViewMode) => void;
 }
 
@@ -72,6 +83,7 @@ export interface LoadProfileChartProps {
   viewMode: ViewMode;
   isMultiDevice: boolean;
   hasTimeBlocks: boolean;
+  totals: LoadProfileTotals;
 }
 
 export interface SavingsBannerProps {
